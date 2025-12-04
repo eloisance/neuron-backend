@@ -12,6 +12,25 @@ services:
     volumes:
       # This ensures your data persists even if you stop the container
       - postgres_data:/var/lib/postgresql/data
+    # Optional: Check if the DB is ready (Good practice for Ktor apps)
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
 volumes:
   postgres_data:
+
+# OPTIONAL: If you containerize your Ktor app later
+# app:
+#   build: .
+#   ports:
+#     - "8080:8080"
+#   depends_on:
+#     db:
+#       condition: service_healthy
+#   environment:
+#     - DB_USER=${DB_USER}
+#     - DB_PASSWORD=${DB_PASSWORD}
+#     - DB_URL=jdbc:postgresql://db:5432/${DB_NAME}

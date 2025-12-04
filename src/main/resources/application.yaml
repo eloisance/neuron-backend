@@ -1,6 +1,14 @@
 ktor:
     application:
         modules:
-            - com.neuron.ApplicationKt.module
+            - com.neuron.ApplicationKt.mainModule
     deployment:
         port: 8080
+
+# Custom section for Database - referencing the env vars from your .env file
+storage:
+    driverName: "postgresql"
+    r2dbcUrl: "r2dbc:postgresql://localhost:5432/"
+    databaseName: ${DB_NAME}
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
