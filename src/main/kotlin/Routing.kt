@@ -2,7 +2,9 @@ package com.neuron
 
 import com.neuron.model.ChallengeResultDto
 import com.neuron.model.ChallengeResultsTable
+import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.*
+import io.ktor.server.request.receive
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import kotlinx.coroutines.flow.toList
@@ -22,7 +24,6 @@ fun Application.configureRouting(db: R2dbcDatabase) {
                 addLogger(StdOutSqlLogger)
                 ChallengeResultsTable.selectAll().toList().map {
                     ChallengeResultDto(
-                        id = it[ChallengeResultsTable.id].value,
                         challengeText = it[ChallengeResultsTable.challengeText],
                         time = it[ChallengeResultsTable.time],
                     )
@@ -31,14 +32,15 @@ fun Application.configureRouting(db: R2dbcDatabase) {
             call.respond(result)
         }
         post(path = "/challenge-result") {
+            val request = call.receive<ChallengeResultDto>()
             suspendTransaction(db) {
                 addLogger(StdOutSqlLogger)
                 ChallengeResultsTable.insert {
-                    it[challengeText] = "1+2"
-                    it[time] = 344L
+                    it[challengeText] = request.challengeText
+                    it[time] = request.time
                 }
             }
-            call.respondText("Challenge result added")
+            call.respond(status = HttpStatusCode.OK, message = "Challenge result added")
         }
     }
 }
